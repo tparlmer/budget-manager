@@ -34,3 +34,45 @@ function saveRecord(record) {
     // add record to object store with add method
     budgetObjectStore.add(record);
 }
+
+function uploadBudget() {
+    // open a transaction on your db
+    const transaction = db.transaction(['budget_input'], 'readwrite');
+    // access your object store
+    const budgetObjectStore = transaction.objectStore('budget_input');
+    // get all records from the object store and set to a variable
+    const getAll = budgetObjectStore.getAll();
+
+    getAll.onsuccess = function() {
+        // if there was data in indexDB's store, send it to api
+        if (getAll.result.length > 0) {
+            fetch('api/budget', {
+                method: 'POST',
+                body: JSON.stringify(getAll.result),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(serverResponse => {
+                if (serverResponse.message) {
+                    throw new Error(serverResponse)
+                }
+                // open one more transaction
+                const transaction = db.transaction(['budget_input'], 'readwrite');
+                // access the object store
+                const budgetObjectStore = transaction.objectStore('budget_input');
+                // clear the object store
+                budgetObjectStore.clear();
+
+                alert('All saved budget items have been submitted');
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        }
+    }
+}
+
+// listen for app coming back online
+window.addEventListener('online', uploadBudget);

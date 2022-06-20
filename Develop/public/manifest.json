@@ -28,8 +28,8 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "",
+    "theme_color": "#01579b",
     "background_color": "ffffff",
-    "start_url": "",
+    "start_url": "./index.html",
     "display": ""
 }
